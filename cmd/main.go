@@ -179,14 +179,15 @@ func mergeBatch(tempFiles []string) (string, error) {
 
 	for h.Len() > 0 {
 		entry := heap.Pop(h).(*fileEntry)
-		wordBuffer[entry.word] += entry.count
 
-		if len(wordBuffer) >= MAX_WORDS_IN_MEMORY {
+		if _, ok := wordBuffer[entry.word]; !ok && len(wordBuffer) >= MAX_WORDS_IN_MEMORY {
 			if err := flushBufferToWriter(wordBuffer, writer); err != nil {
 				return "", err
 			}
 			wordBuffer = make(map[string]int)
 		}
+
+		wordBuffer[entry.word] += entry.count
 
 		scanner := readers[entry.fileIdx]
 		if scanner.Scan() {
